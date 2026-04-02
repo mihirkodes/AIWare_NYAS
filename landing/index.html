@@ -1,0 +1,961 @@
+<!-- Made by Peter Shawkat -->
+<!-- haibi297, Pedro on Github -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AIware — AI Literacy Toolkit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --dc-bar:       #1e1f22;
+      --dc-sidebar:   #2b2d31;
+      --dc-main:      #313338;
+      --dc-elevated:  #383a40;
+      --dc-hover:     rgba(59,130,246,0.12);
+      --dc-selected:  rgba(59,130,246,0.22);
+      --blue:         #3b82f6;
+      --blue-lt:      #60a5fa;
+      --blue-glow:    rgba(59,130,246,0.35);
+      --cyan:         #38bdf8;
+      --text:         #dbdee1;
+      --text-bright:  #f2f3f5;
+      --muted:        #949ba4;
+      --muted-lt:     #b5bac1;
+      --border:       rgba(255,255,255,0.06);
+      --r:            8px;
+      --r-btn:        50px;
+      --bar-w:        72px;
+      --sidebar-w:    240px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; height: 100%; }
+
+    body {
+      background: var(--dc-main);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Server Bar */
+    .server-bar {
+      width: var(--bar-w);
+      min-width: var(--bar-w);
+      background: var(--dc-bar);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px 0;
+      gap: 8px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      z-index: 10;
+    }
+
+    .server-bar::-webkit-scrollbar { width: 0; }
+
+    .server-icon {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: border-radius 0.2s, background 0.2s;
+      position: relative;
+      font-size: 1.1rem;
+      font-weight: 700;
+      background: var(--dc-sidebar);
+      color: var(--muted-lt);
+      font-family: 'Syne', sans-serif;
+    }
+
+    .server-icon:hover, .server-icon.active {
+      border-radius: 30%;
+      background: var(--blue);
+      color: #fff;
+    }
+
+    .server-icon.active::before {
+      content: '';
+      position: absolute;
+      left: -12px; top: 50%;
+      transform: translateY(-50%);
+      width: 4px; height: 40px;
+      background: var(--text-bright);
+      border-radius: 0 4px 4px 0;
+    }
+
+    .server-icon.brand {
+      background: linear-gradient(135deg, #1a3a6b, #0d2247);
+      color: var(--blue-lt);
+      font-size: 0.72rem;
+      letter-spacing: -0.02em;
+      border-radius: 30%;
+      line-height: 1.2;
+      text-align: center;
+    }
+
+    .server-icon.brand:hover { border-radius: 30%; background: var(--blue); color: #fff; }
+
+    .server-divider {
+      width: 32px; height: 2px;
+      background: var(--border);
+      border-radius: 2px;
+      margin: 4px 0;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: var(--sidebar-w);
+      min-width: var(--sidebar-w);
+      background: var(--dc-sidebar);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .sidebar-header {
+      padding: 0 16px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid rgba(0,0,0,0.3);
+      flex-shrink: 0;
+    }
+
+    .sidebar-header-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text-bright);
+      letter-spacing: -0.01em;
+    }
+
+    .sidebar-header-title span {
+      background: linear-gradient(135deg, var(--blue-lt), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .sidebar-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 0 16px;
+    }
+
+    .sidebar-body::-webkit-scrollbar { width: 4px; }
+    .sidebar-body::-webkit-scrollbar-track { background: transparent; }
+    .sidebar-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+    .channel-category {
+      padding: 16px 8px 4px 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .channel-category-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      flex: 1;
+      transition: color 0.15s;
+    }
+
+    .channel-category:hover .channel-category-label { color: var(--muted-lt); }
+
+    .category-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dot-green  { background: #23a559; }
+    .dot-blue   { background: var(--blue); }
+    .dot-purple { background: #9b84ee; }
+
+    .channel-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 8px 4px 16px;
+      margin: 1px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 0.88rem;
+      font-weight: 400;
+      transition: background 0.1s, color 0.1s;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .channel-item:hover { background: var(--dc-hover); color: var(--muted-lt); }
+    .channel-item.active { background: var(--dc-selected); color: var(--text-bright); font-weight: 500; }
+
+    .channel-hash {
+      font-size: 1rem;
+      color: var(--muted);
+      flex-shrink: 0;
+      transition: color 0.1s;
+    }
+
+    .channel-item:hover .channel-hash,
+    .channel-item.active .channel-hash { color: var(--muted-lt); }
+
+    .channel-num {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--muted);
+      background: rgba(255,255,255,0.06);
+      padding: 1px 5px;
+      border-radius: 4px;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+
+    .sidebar-footer {
+      height: 52px;
+      background: rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .sidebar-footer-avatar {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue), var(--cyan));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 700; color: #fff;
+      font-family: 'Syne', sans-serif;
+      flex-shrink: 0;
+    }
+
+    .sidebar-footer-info { flex: 1; min-width: 0; }
+    .sidebar-footer-name { font-size: 0.82rem; font-weight: 600; color: var(--text-bright); }
+    .sidebar-footer-status { font-size: 0.7rem; color: var(--muted); display: flex; align-items: center; gap: 4px; }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #23a559; flex-shrink: 0; }
+
+    /* Main */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    .topbar {
+      height: 48px;
+      background: var(--dc-main);
+      border-bottom: 1px solid rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 12px;
+      flex-shrink: 0;
+      z-index: 5;
+    }
+
+    .topbar-hash { color: var(--muted); font-size: 1.3rem; font-weight: 300; }
+    .topbar-title { font-weight: 600; font-size: 0.95rem; color: var(--text-bright); }
+    .topbar-divider { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+    .topbar-desc { font-size: 0.82rem; color: var(--muted); }
+
+    .topbar-actions { margin-left: auto; }
+
+    .topbar-btn {
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      padding: 6px 16px;
+      border-radius: var(--r-btn);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+
+    .topbar-btn:hover { background: var(--blue-lt); box-shadow: 0 0 16px var(--blue-glow); }
+
+    .content-area {
+      flex: 1;
+      overflow-y: auto;
+      background: var(--dc-main);
+    }
+
+    .content-area::-webkit-scrollbar { width: 8px; }
+    .content-area::-webkit-scrollbar-track { background: transparent; }
+    .content-area::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+    /* Hero */
+    .hero-block {
+      padding: 48px 32px 40px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(135deg, rgba(15,26,50,0.8) 0%, rgba(49,51,56,0) 70%);
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(59,130,246,0.15);
+      border: 1px solid rgba(59,130,246,0.3);
+      color: var(--blue-lt);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: var(--r-btn);
+      margin-bottom: 20px;
+    }
+
+    .hero-badge::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 8px var(--cyan);
+    }
+
+    .hero-block h1 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      letter-spacing: -0.04em;
+      line-height: 1.05;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #fff 0%, var(--blue-lt) 55%, var(--cyan) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      font-weight: 600;
+      color: var(--muted-lt);
+      margin-bottom: 12px;
+    }
+
+    .hero-desc {
+      max-width: 520px;
+      font-size: 0.95rem;
+      color: var(--muted);
+      font-weight: 300;
+      margin-bottom: 28px;
+      line-height: 1.65;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 10px 22px;
+      border-radius: var(--r-btn);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+      text-decoration: none;
+      border: none;
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+
+    .btn-primary {
+      background: var(--blue);
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(59,130,246,0.4);
+    }
+
+    .btn-primary:hover { background: var(--blue-lt); box-shadow: 0 6px 24px rgba(59,130,246,0.5); }
+
+    .btn-secondary {
+      background: var(--dc-elevated);
+      color: var(--text-bright);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover { background: rgba(255,255,255,0.1); }
+
+    /* Stats row */
+    .stats-row {
+      display: flex;
+      gap: 0;
+      flex-wrap: wrap;
+      margin-top: 32px;
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      overflow: hidden;
+      background: var(--dc-sidebar);
+      max-width: 560px;
+    }
+
+    .stat-item {
+      flex: 1;
+      min-width: 100px;
+      padding: 16px 14px;
+      text-align: center;
+      border-right: 1px solid var(--border);
+    }
+
+    .stat-item:last-child { border-right: none; }
+
+    .stat-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--blue-lt);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .stat-lbl { font-size: 0.7rem; color: var(--muted); font-weight: 400; letter-spacing: 0.04em; }
+
+    .system-msg {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 16px 32px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sys-avatar {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1a3a6b, var(--blue));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .sys-content { flex: 1; min-width: 0; }
+
+    .sys-header {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .sys-name { font-weight: 600; font-size: 0.92rem; color: var(--blue-lt); }
+
+    .sys-badge {
+      font-size: 0.6rem;
+      font-weight: 700;
+      background: var(--blue);
+      color: #fff;
+      padding: 1px 5px;
+      border-radius: 4px;
+      letter-spacing: 0.04em;
+    }
+
+    .sys-time { font-size: 0.7rem; color: var(--muted); }
+    .sys-text { font-size: 0.9rem; color: var(--text); line-height: 1.6; }
+
+    /* Section blocks */
+    .section-block {
+      padding: 36px 32px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-eyebrow {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--blue-lt);
+      margin-bottom: 8px;
+    }
+
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: clamp(1.3rem, 3vw, 1.9rem);
+      letter-spacing: -0.03em;
+      color: var(--text-bright);
+      margin-bottom: 8px;
+    }
+
+    .section-desc {
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 300;
+      max-width: 540px;
+      margin-bottom: 24px;
+    }
+
+    /* Module list */
+    .module-tier-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      margin-top: 24px;
+    }
+
+    .module-tier-header:first-of-type { margin-top: 0; }
+
+    .tier-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+    .tier-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .tier-line { flex: 1; height: 1px; background: var(--border); }
+
+    .module-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .module-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      background: var(--dc-sidebar);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .module-row:hover {
+      background: var(--dc-elevated);
+      border-color: rgba(59,130,246,0.3);
+    }
+
+    .module-row-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--blue);
+      letter-spacing: 0.05em;
+      min-width: 36px;
+      flex-shrink: 0;
+    }
+
+    .module-row-name {
+      font-size: 0.87rem;
+      font-weight: 500;
+      color: var(--text);
+      flex: 1;
+      min-width: 0;
+    }
+
+    .module-row-pill {
+      font-size: 0.64rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    .pill-beg    { background: rgba(35,165,89,0.18); color: #3ba55d; }
+    .pill-int    { background: rgba(59,130,246,0.18); color: #60a5fa; }
+    .pill-adv    { background: rgba(155,132,238,0.18); color: #b9aaff; }
+
+    /* Who it's for */
+    .for-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 10px;
+    }
+
+    .for-card {
+      background: var(--dc-sidebar);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 20px 18px;
+      transition: background 0.2s, border-color 0.2s, transform 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .for-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+
+    .for-card:nth-child(1)::after { background: linear-gradient(90deg, #23a559, #3ba55d); }
+    .for-card:nth-child(2)::after { background: linear-gradient(90deg, var(--blue), var(--cyan)); }
+    .for-card:nth-child(3)::after { background: linear-gradient(90deg, #9b84ee, #b9aaff); }
+
+    .for-card:hover { background: var(--dc-elevated); border-color: rgba(59,130,246,0.3); transform: translateY(-3px); }
+    .for-card:hover::after { opacity: 1; }
+
+    .for-icon { font-size: 1.8rem; margin-bottom: 12px; display: block; }
+
+    .for-card h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-bright);
+      margin-bottom: 6px;
+    }
+
+    .for-card p { font-size: 0.82rem; color: var(--muted); font-weight: 300; line-height: 1.55; }
+
+    .for-tag {
+      display: inline-block;
+      margin-top: 12px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--blue-lt);
+      background: rgba(59,130,246,0.1);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    /* CTA */
+    .cta-block {
+      margin: 32px;
+      background: linear-gradient(135deg, #0d2247 0%, #1a2744 60%, #0f1a30 100%);
+      border: 1px solid rgba(59,130,246,0.3);
+      border-radius: 12px;
+      padding: 48px 36px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-block::before {
+      content: '';
+      position: absolute;
+      top: -60px; left: 50%;
+      transform: translateX(-50%);
+      width: 300px; height: 150px;
+      background: radial-gradient(ellipse, rgba(59,130,246,0.2) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .cta-block h2 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: clamp(1.5rem, 3vw, 2.1rem);
+      letter-spacing: -0.03em;
+      color: var(--text-bright);
+      margin-bottom: 10px;
+    }
+
+    .cta-block p { color: var(--muted); max-width: 400px; margin: 0 auto 28px; font-size: 0.92rem; }
+    .cta-block .btn-row { justify-content: center; }
+
+    /* Mobile */
+    .mobile-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 1.1rem;
+      padding: 4px;
+      margin-right: 4px;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .server-bar { display: none; }
+    }
+
+    @media (max-width: 680px) {
+      body { flex-direction: column; overflow: auto; height: auto; }
+
+      .sidebar {
+        width: 100%;
+        min-width: unset;
+        height: auto;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+      }
+
+      .sidebar.open { max-height: 440px; }
+
+      .main { overflow: visible; }
+      .content-area { overflow: visible; }
+      .mobile-toggle { display: flex; }
+      .hero-block { padding: 28px 20px; }
+      .section-block { padding: 28px 20px; }
+      .cta-block { margin: 20px; padding: 32px 20px; }
+      .system-msg { padding: 14px 20px; }
+      .module-grid { grid-template-columns: 1fr; }
+      .for-grid { grid-template-columns: 1fr; }
+      .topbar-desc { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="content-area">
+
+      <!-- Hero -->
+      <div class="hero-block">
+        <div class="hero-badge">Free for Students &amp; Educators</div>
+        <h1>AIware</h1>
+        <p class="hero-sub">The AI Literacy Toolkit built for every student.</p>
+        <p class="hero-desc">
+          Understand how artificial intelligence works and how to use it, through clear, hands-on lessons designed for real classrooms.
+        </p>
+        <div class="btn-row">
+          <a href="#" class="btn btn-primary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+            Get Started Free
+          </a>
+          <a href="#" class="btn btn-secondary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download Printables
+          </a>
+        </div>
+        <div class="stats-row">
+          <div class="stat-item">
+            <div class="stat-num">15</div>
+            <div class="stat-lbl">Modules</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">100%</div>
+            <div class="stat-lbl">Free Access</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">0</div>
+            <div class="stat-lbl">Exp. Needed</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">3</div>
+            <div class="stat-lbl">Skill Levels</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="system-msg">
+        <div class="sys-avatar">☺️</div>
+        <div class="sys-content">
+          <div class="sys-text">
+            Welcome to <strong>AIware</strong>, a structured, self-paced AI curriculum built for students who've never had access to this kind of education. Browse all 15 modules below, from absolute beginner to advanced, all completely free.
+          </div>
+        </div>
+      </div>
+
+      <!-- What you Learn -->
+      <div class="section-block">
+        <div class="section-eyebrow">Curriculum</div>
+        <div class="section-title">15 Modules. Beginner to Advanced.</div>
+        <p class="section-desc">A fully structured path that grows with you, from "What is AI?" to building real systems and utilizing the technology shaping the world.</p>
+
+        <div class="module-tier-header">
+          <div class="tier-dot" style="background:#23a559"></div>
+          <div class="tier-label">Beginner: Understand what AI is and how it shows up in everyday life</div>
+          <div class="tier-line"></div>
+        </div>
+        <div class="module-grid">
+          <div class="module-row">
+            <div class="module-row-num">MOD 01</div>
+            <div class="module-row-name">What Is AI Really?</div>
+            <span class="module-row-pill pill-beg">Beginner</span>
+          </div>
+          <div class="module-row">
+            <div class="module-row-num">MOD 02</div>
+            <div class="module-row-name">How AI Learns from Data</div>
+            <span class="module-row-pill pill-beg">Beginner</span>
+          </div>
+          <div class="module-row">
+            <div class="module-row-num">MOD 03</div>
+            <div class="module-row-name">Generative vs Predictive AI</div>
+            <span class="module-row-pill pill-beg">Beginner</span>
+          </div>
+          <div class="module-row">
+            <div class="module-row-num">MOD 04</div>
+            <div class="module-row-name">Spotting AI-Generated Content</div>
+            <span class="module-row-pill pill-beg">Beginner</span>
+          </div>
+          <div class="module-row">
+            <div class="module-row-num">MOD 05</div>
+            <div class="module-row-name">AI Hallucinations &amp; Fact-Checking</div>
+            <span class="module-row-pill pill-beg">Beginner</span>
+          </div>
+        </div>
+
+        <div class="module-tier-header">
+          <div class="tier-dot" style="background:var(--blue)"></div>
+          <div class="tier-label">Intermediate: Understand how AI works and its real-world impact</div>
+          <div class="tier-line"></div>
+        </div>
+        <div class="module-grid">
+          <div class="module-row">
+            <div class="module-row-num">MOD 06</div>
+            <div class="module-row-name">AI Ethics &amp; Privacy</div>
+            <span class="module-row-pill pill-int">Intermediate</span>
+          </div>
+          <div class="module-row">
+            <div class="module-row-num">MOD 07</div>
+            <div class="module-row-name">AI &amp; Environment</div>
+            <span class="module-row-pill pill-int">Intermediate</span>
+          </div>
+          <div class="module-row">
+            <div class="module-row-num">MOD 08</div>
+            <div class="module-row-name">Prompt Engineering</div>
+            <span class="module-row-pill pill-int">Intermediate</span>
+          </div>
+          <div class="module-row">
+            <div class="module-row-num">MOD 09</div>
+            <div class="module-row-name">How Neural Networks Work</div>
+            <span class="module-row-pill pill-int">Intermediate</span>
+          </div>
+          <div class="module-row">
+            <div class="module-row-num">MOD 10</div>
+            <div class="module-row-name">Precision, Recall &amp; Accuracy</div>
+            <span class="module-row-pill pill-int">Intermediate</span>
+          </div>
+        </div>
+
+        <div class="module-tier-header">
+          <div class="tier-dot" style="background:#9b84ee"></div>
+          <div class="tier-label">Advanced: Apply AI concepts and build real systems</div>
+          <div class="tier-line"></div>
+        </div>
+        <div class="module-grid">
+          <div class="module-row">
+            <div class="module-row-num">MOD 11</div>
+            <div class="module-row-name">Choosing AI Models</div>
+            <span class="module-row-pill pill-adv">Advanced</span>
+          </div>
+          <div class="module-row">
+            <div class="module-row-num">MOD 12</div>
+            <div class="module-row-name">Vibe Coding with AI</div>
+            <span class="module-row-pill pill-adv">Advanced</span>
+          </div>
+          <div class="module-row">
+            <div class="module-row-num">MOD 13</div>
+            <div class="module-row-name">Agentic AI</div>
+            <span class="module-row-pill pill-adv">Advanced</span>
+          </div>
+          <div class="module-row">
+            <div class="module-row-num">MOD 14</div>
+            <div class="module-row-name">APIs &amp; MCP Protocols</div>
+            <span class="module-row-pill pill-adv">Advanced</span>
+          </div>
+          <div class="module-row">
+            <div class="module-row-num">MOD 15</div>
+            <div class="module-row-name">Capstone Design Challenge</div>
+            <span class="module-row-pill pill-adv">Advanced</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Who it's for -->
+      <div class="section-block">
+        <div class="section-eyebrow">Who It's For</div>
+        <div class="section-title">Built for Communities That Are Often Left Out</div>
+        <p class="section-desc">AI education shouldn't be a privilege. AIware was designed specifically for students in underserved communities — giving everyone equal access to the skills reshaping the world.</p>
+
+        <div class="for-grid">
+          <div class="for-card">
+            <span class="for-icon">🎒</span>
+            <h3>Students in Under-Resourced Schools</h3>
+            <p>No laptop lab, no CS class, no problem. AIware works on any device and requires zero prior tech knowledge — just curiosity.</p>
+            <span class="for-tag">Ages 11+</span>
+          </div>
+          <div class="for-card">
+            <span class="for-icon">🧑‍🏫</span>
+            <h3>Teachers &amp; Community Educators</h3>
+            <p>Ready-made lesson plans, printable worksheets, and discussion guides built for real classrooms — not just well-funded ones.</p>
+            <span class="for-tag">Classroom Ready</span>
+          </div>
+          <div class="for-card">
+            <span class="for-icon">🌱</span>
+            <h3>First-Generation Tech Learners</h3>
+            <p>If no one in your family has worked in tech, this is your starting point. No jargon, no gatekeeping — just honest, accessible education.</p>
+            <span class="for-tag">No Experience Needed</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cta -->
+      <div class="cta-block">
+        <h2>The future runs on AI.<br>You should too.</h2>
+        <p>Start learning today — completely free. No account required for the first 5 modules.</p>
+        <div class="btn-row">
+          <a href="#" class="btn btn-primary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+            Get Started Free
+          </a>
+          <a href="#" class="btn btn-secondary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download Printables
+          </a>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div style="padding:20px 32px;border-top:1px solid var(--border);text-align:center;color:var(--muted);font-size:0.78rem;">
+        <strong style="color:var(--blue-lt);font-family:'Syne',sans-serif;">AIware</strong> — AI Literacy Toolkit · Free for students in underserved communities worldwide.
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const items = document.querySelectorAll('.channel-item');
+    items.forEach(item => {
+      item.addEventListener('click', () => {
+        items.forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        const num = item.querySelector('.channel-num')?.textContent;
+        if (num) document.querySelector('.topbar-title').textContent = item.textContent.trim().replace(num, '').trim();
+      });
+    });
+  </script>
+
+</body>
+</html>

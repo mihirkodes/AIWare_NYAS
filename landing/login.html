@@ -1,0 +1,322 @@
+<!-- Made by Peter Shawkat -->
+<!-- haibi297, Pedro on Github -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AIware — Log In</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root {
+      --dc-bar:      #1e1f22;
+      --dc-sidebar:  #2b2d31;
+      --dc-main:     #313338;
+      --dc-elevated: #383a40;
+      --blue:        #3b82f6;
+      --blue-lt:     #60a5fa;
+      --blue-glow:   rgba(59,130,246,0.35);
+      --cyan:        #38bdf8;
+      --text:        #dbdee1;
+      --text-bright: #f2f3f5;
+      --muted:       #949ba4;
+      --border:      rgba(255,255,255,0.06);
+      --r:           8px;
+      --r-btn:       50px;
+      --error:       #f87171;
+      --error-bg:    rgba(248,113,113,0.1);
+      --success:     #34d399;
+      --success-bg:  rgba(52,211,153,0.1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { height: 100%; }
+
+    body {
+      background: var(--dc-main);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(59,130,246,0.15) 0%, transparent 70%),
+        radial-gradient(rgba(59,130,246,0.08) 1px, transparent 1px);
+      background-size: 100% 100%, 28px 28px;
+    }
+
+    .card {
+      background: var(--dc-sidebar);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.6rem;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, var(--blue-lt), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-align: center;
+      margin-bottom: 6px;
+    }
+
+    .card-subtitle {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.88rem;
+      margin-bottom: 28px;
+    }
+
+    .field {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    input {
+      width: 100%;
+      background: var(--dc-main);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 10px 14px;
+      color: var(--text-bright);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.92rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+    }
+
+    input::placeholder { color: var(--muted); }
+
+    .btn {
+      width: 100%;
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: var(--r-btn);
+      padding: 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background 0.2s, box-shadow 0.2s, opacity 0.2s;
+    }
+
+    .btn:hover { background: var(--blue-lt); box-shadow: 0 0 20px var(--blue-glow); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .btn-logout {
+      width: 100%;
+      background: var(--dc-elevated);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: var(--r-btn);
+      padding: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background 0.2s;
+    }
+
+    .btn-logout:hover { background: rgba(255,255,255,0.08); }
+
+    .alert {
+      display: none;
+      padding: 10px 14px;
+      border-radius: var(--r);
+      font-size: 0.85rem;
+      margin-bottom: 16px;
+    }
+
+    .alert.error   { display: block; background: var(--error-bg);   color: var(--error);   border: 1px solid rgba(248,113,113,0.25); }
+    .alert.success { display: block; background: var(--success-bg); color: var(--success); border: 1px solid rgba(52,211,153,0.25); }
+
+    .footer-link {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .footer-link a {
+      color: var(--blue-lt);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .footer-link a:hover { text-decoration: underline; }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 20px 0;
+    }
+
+    .logged-in-box {
+      display: none;
+      text-align: center;
+    }
+
+    .logged-in-box .user-email {
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .logged-in-box h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-bright);
+    }
+
+    .login-form { display: block; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <div class="logo">AIware</div>
+    <p class="card-subtitle">Welcome back</p>
+
+    <div class="alert" id="alert"></div>
+
+    <div class="login-form" id="login-form">
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="you@example.com" autocomplete="email" />
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Your password" autocomplete="current-password" />
+      </div>
+
+      <button class="btn" id="login-btn" onclick="login()">Log In</button>
+
+      <div class="divider"></div>
+
+      <div class="footer-link">
+        Don't have an account? <a href="register.html">Create Account</a>
+      </div>
+    </div>
+
+    <div class="logged-in-box" id="logged-in-box">
+      <h3>You're logged in ✓</h3>
+      <p class="user-email" id="user-email"></p>
+      <button class="btn-logout" onclick="logout()">Log Out</button>
+    </div>
+  </div>
+
+  <script>
+    const { createClient } = supabase;
+    const client = createClient(
+      'https://lhqdgwzflevedkpgqafm.supabase.co',
+      'sb_publishable_HHsJdDgkNFDOwEGrHPdjRg_nM92YML1'
+    );
+
+    function showAlert(message, type) {
+      const alert = document.getElementById('alert');
+      alert.textContent = message;
+      alert.className = 'alert ' + type;
+    }
+
+    function clearAlert() {
+      document.getElementById('alert').className = 'alert';
+    }
+
+    function showLoggedIn(email) {
+      document.getElementById('login-form').style.display = 'none';
+      document.getElementById('logged-in-box').style.display = 'block';
+      document.getElementById('user-email').textContent = email;
+      document.querySelector('.card-subtitle').textContent = 'Logged in successfully';
+    }
+
+    function showLoginForm() {
+      document.getElementById('login-form').style.display = 'block';
+      document.getElementById('logged-in-box').style.display = 'none';
+      document.querySelector('.card-subtitle').textContent = 'Welcome back';
+    }
+
+    async function login() {
+      clearAlert();
+
+      const email    = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const btn      = document.getElementById('login-btn');
+
+      if (!email)    return showAlert('Please enter your email.', 'error');
+      if (!password) return showAlert('Please enter your password.', 'error');
+
+      btn.disabled = true;
+      btn.textContent = 'Logging in...';
+
+      const { data, error } = await client.auth.signInWithPassword({ email, password });
+
+      btn.disabled = false;
+      btn.textContent = 'Log In';
+
+      if (error) {
+        showAlert(error.message, 'error');
+        return;
+      }
+
+      showLoggedIn(data.user.email);
+    }
+
+    async function logout() {
+      await client.auth.signOut();
+      clearAlert();
+      showAlert('Logged out successfully.', 'success');
+      document.getElementById('email').value = '';
+      document.getElementById('password').value = '';
+      showLoginForm();
+    }
+
+    async function checkSession() {
+      const { data } = await client.auth.getSession();
+      if (data.session) {
+        showLoggedIn(data.session.user.email);
+      }
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter') login();
+    });
+
+    checkSession();
+  </script>
+
+</body>
+</html>

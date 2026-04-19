@@ -1,0 +1,682 @@
+<!-- Made by Peter Shawkat -->
+<!-- haibi297, Pedro on Github -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AIware — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root {
+      --dc-bar:      #1e1f22;
+      --dc-sidebar:  #2b2d31;
+      --dc-main:     #313338;
+      --dc-elevated: #383a40;
+      --blue:        #3b82f6;
+      --blue-lt:     #60a5fa;
+      --blue-glow:   rgba(59,130,246,0.35);
+      --cyan:        #38bdf8;
+      --green:       #23a559;
+      --green-lt:    #3ba55d;
+      --purple:      #9b84ee;
+      --purple-lt:   #b9aaff;
+      --text:        #dbdee1;
+      --text-bright: #f2f3f5;
+      --muted:       #949ba4;
+      --muted-lt:    #b5bac1;
+      --border:      rgba(255,255,255,0.06);
+      --r:           8px;
+      --r-btn:       50px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--dc-main);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* Topbar */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(30,31,34,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      height: 52px;
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+      gap: 16px;
+    }
+
+    .topbar-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.1rem;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, var(--blue-lt), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-decoration: none;
+    }
+
+    .topbar-divider { width: 1px; height: 18px; background: var(--border); }
+
+    .topbar-page {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-bright);
+    }
+
+    .topbar-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .topbar-user {
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .topbar-user span {
+      color: var(--text-bright);
+      font-weight: 500;
+    }
+
+    .btn-logout {
+      background: var(--dc-elevated);
+      color: var(--muted-lt);
+      border: 1px solid var(--border);
+      border-radius: var(--r-btn);
+      padding: 5px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .btn-logout:hover { background: rgba(255,255,255,0.08); color: var(--text-bright); }
+
+    /* Page content */
+    .page {
+      max-width: 1060px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    /* Welcome block */
+    .welcome-block {
+      margin-bottom: 36px;
+    }
+
+    .welcome-block h1 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      letter-spacing: -0.03em;
+      color: var(--text-bright);
+      margin-bottom: 4px;
+    }
+
+    .welcome-block h1 span {
+      background: linear-gradient(135deg, var(--blue-lt), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .welcome-sub {
+      color: var(--muted);
+      font-size: 0.95rem;
+      font-weight: 300;
+    }
+
+    /* Progress card */
+    .progress-card {
+      background: var(--dc-sidebar);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin-bottom: 40px;
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      flex-wrap: wrap;
+    }
+
+    .progress-info { flex: 1; min-width: 200px; }
+
+    .progress-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .progress-bar-wrap {
+      background: rgba(255,255,255,0.06);
+      border-radius: 99px;
+      height: 10px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, var(--blue), var(--cyan));
+      transition: width 0.8s ease;
+      width: 0%;
+    }
+
+    .progress-text {
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .progress-text strong {
+      color: var(--blue-lt);
+      font-weight: 700;
+    }
+
+    .progress-stats {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .progress-stat {
+      text-align: center;
+    }
+
+    .progress-stat-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--text-bright);
+      line-height: 1;
+    }
+
+    .progress-stat-lbl {
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      margin-top: 2px;
+    }
+
+    /* Section headers */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      margin-top: 36px;
+    }
+
+    .section-header:first-of-type { margin-top: 0; }
+
+    .section-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.82rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted-lt);
+    }
+
+    .section-goal {
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-weight: 300;
+    }
+
+    .section-line { flex: 1; height: 1px; background: var(--border); }
+
+    /* Module grid */
+    .module-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .module-card {
+      background: var(--dc-sidebar);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 18px 20px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, transform 0.15s;
+      text-decoration: none;
+      display: block;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .module-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 3px; height: 100%;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .module-card.beg::before { background: var(--green); }
+    .module-card.int::before { background: var(--blue); }
+    .module-card.adv::before { background: var(--purple); }
+
+    .module-card:hover {
+      background: var(--dc-elevated);
+      transform: translateY(-2px);
+    }
+
+    .module-card:hover::before { opacity: 1; }
+    .module-card.beg:hover { border-color: rgba(35,165,89,0.35); }
+    .module-card.int:hover { border-color: rgba(59,130,246,0.35); }
+    .module-card.adv:hover { border-color: rgba(155,132,238,0.35); }
+
+    .module-card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .module-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      flex-shrink: 0;
+    }
+
+    .module-card.beg .module-num { color: var(--green); }
+    .module-card.int .module-num { color: var(--blue-lt); }
+    .module-card.adv .module-num { color: var(--purple-lt); }
+
+    .module-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .status-check {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+
+    .status-check.complete {
+      background: rgba(35,165,89,0.2);
+      color: var(--green);
+      border: 1px solid rgba(35,165,89,0.3);
+    }
+
+    .status-check.incomplete {
+      background: rgba(255,255,255,0.05);
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    .module-score {
+      font-size: 0.7rem;
+      color: var(--green);
+      font-weight: 600;
+    }
+
+    .module-card h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--text-bright);
+      margin-bottom: 6px;
+      line-height: 1.3;
+    }
+
+    .module-card p {
+      font-size: 0.8rem;
+      color: var(--muted);
+      font-weight: 300;
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .module-pill {
+      display: inline-block;
+      margin-top: 10px;
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 20px;
+    }
+
+    .module-card.beg .module-pill { background: rgba(35,165,89,0.15); color: var(--green-lt); }
+    .module-card.int .module-pill { background: rgba(59,130,246,0.15); color: var(--blue-lt); }
+    .module-card.adv .module-pill { background: rgba(155,132,238,0.15); color: var(--purple-lt); }
+
+    /* Loading / error states */
+    .loading-state {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--muted);
+    }
+
+    .loading-spinner {
+      width: 32px; height: 32px;
+      border: 3px solid var(--border);
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Responsive */
+    @media (max-width: 680px) {
+      .topbar { padding: 0 16px; }
+      .topbar-user { display: none; }
+      .page { padding: 24px 16px 60px; }
+      .progress-card { padding: 18px 16px; flex-direction: column; gap: 20px; }
+      .module-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <a href="index.html" class="topbar-logo">AIware</a>
+    <div class="topbar-divider"></div>
+    <span class="topbar-page">Dashboard</span>
+    <div class="topbar-right">
+      <span class="topbar-user">Logged in as <span id="topbar-email">...</span></span>
+      <button class="btn-logout" onclick="logout()">Log Out</button>
+    </div>
+  </div>
+
+  <!-- Loading state -->
+  <div class="loading-state" id="loading-state">
+    <div class="loading-spinner"></div>
+    <p>Loading your dashboard...</p>
+  </div>
+
+  <!-- Main page (hidden until loaded) -->
+  <div class="page" id="page-content" style="display:none;">
+
+    <div class="welcome-block">
+      <h1>Welcome back, <span id="user-name">Student</span> 👋</h1>
+      <p class="welcome-sub">Pick up where you left off, or start a new module below.</p>
+    </div>
+
+    <div class="progress-card">
+      <div class="progress-info">
+        <div class="progress-label">Overall Progress</div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" id="progress-bar"></div>
+        </div>
+        <div class="progress-text">
+          <strong id="completed-count">0</strong> out of <strong>15</strong> modules complete
+        </div>
+      </div>
+      <div class="progress-stats">
+        <div class="progress-stat">
+          <div class="progress-stat-num" id="stat-completed">0</div>
+          <div class="progress-stat-lbl">Completed</div>
+        </div>
+        <div class="progress-stat">
+          <div class="progress-stat-num" id="stat-remaining">15</div>
+          <div class="progress-stat-lbl">Remaining</div>
+        </div>
+        <div class="progress-stat">
+          <div class="progress-stat-num" id="stat-avg">—</div>
+          <div class="progress-stat-lbl">Avg. Score</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Beginner modules -->
+    <div class="section-header">
+      <div class="section-dot" style="background:var(--green)"></div>
+      <span class="section-title">Beginner</span>
+      <span class="section-goal">Modules 1–5 · Understand what AI is and how it shows up in everyday life</span>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="module-grid" id="grid-beginner"></div>
+
+    <!-- Intermediate modules -->
+    <div class="section-header">
+      <div class="section-dot" style="background:var(--blue)"></div>
+      <span class="section-title">Intermediate</span>
+      <span class="section-goal">Modules 6–10 · Understand how AI works and its real-world impact</span>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="module-grid" id="grid-intermediate"></div>
+
+    <!-- Advanced modules -->
+    <div class="section-header">
+      <div class="section-dot" style="background:var(--purple)"></div>
+      <span class="section-title">Advanced</span>
+      <span class="section-goal">Modules 11–15 · Apply AI concepts and build real systems</span>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="module-grid" id="grid-advanced"></div>
+
+  </div>
+
+  <script>
+    const { createClient } = supabase;
+    const client = createClient(
+      'https://lhqdgwzflevedkpgqafm.supabase.co',
+      'sb_publishable_HHsJdDgkNFDOwEGrHPdjRg_nM92YML1'
+    );
+
+    const MODULES = [
+      {
+        id: 1, tier: 'beg',
+        title: 'What Is AI Really?',
+        desc: 'AI is not a robot with glowing eyes — it is software that learns from examples and gets surprisingly good at specific tasks through repetition and training.'
+      },
+      {
+        id: 2, tier: 'beg',
+        title: 'How AI Learns from Data',
+        desc: 'Before AI can do anything useful, it has to be trained on millions of examples. But bad or biased data means the AI will learn those bad patterns too.'
+      },
+      {
+        id: 3, tier: 'beg',
+        title: 'Generative vs. Predictive AI',
+        desc: 'Some AI creates new things like text and images, while other AI predicts outcomes. Knowing the difference helps you understand what AI can and cannot do.'
+      },
+      {
+        id: 4, tier: 'beg',
+        title: 'Spotting AI-Generated Content',
+        desc: 'AI images still struggle with hands, text, and backgrounds. AI writing is overly polished and generic. Once you know what to look for, you will see it everywhere.'
+      },
+      {
+        id: 5, tier: 'beg',
+        title: 'AI Hallucinations & Fact-Checking',
+        desc: 'AI delivers wrong information with the same confident tone as correct information. Learn the SIFT method to fact-check anything before you believe or share it.'
+      },
+      {
+        id: 6, tier: 'int',
+        title: 'AI Ethics & Privacy',
+        desc: 'Every free app collects your data. AI can process that data at a scale no human could. This module covers who benefits, who gets hurt, and who is responsible.'
+      },
+      {
+        id: 7, tier: 'int',
+        title: 'AI & Environment',
+        desc: 'Every AI query powers up a warehouse of computers that drinks enormous amounts of electricity and water. Understand what free AI actually costs the planet.'
+      },
+      {
+        id: 8, tier: 'int',
+        title: 'Prompt Engineering',
+        desc: 'The quality of AI help depends almost entirely on how well you ask. Specificity, examples, and chain-of-thought prompting can completely change your results.'
+      },
+      {
+        id: 9, tier: 'int',
+        title: 'How Neural Networks Work',
+        desc: 'Neural networks are layers of neurons that each make a tiny math decision. Through backpropagation, they adjust millions of weights until they reliably get it right.'
+      },
+      {
+        id: 10, tier: 'int',
+        title: 'Precision, Recall & Accuracy',
+        desc: 'Accuracy alone can be dangerously misleading. Precision and recall measure different kinds of correctness — and the right trade-off depends on real-world consequences.'
+      },
+      {
+        id: 11, tier: 'adv',
+        title: 'Choosing AI Models',
+        desc: 'Different AI models are built for different tasks. Learn how to evaluate and select the right model for a given problem based on capability, cost, and context.'
+      },
+      {
+        id: 12, tier: 'adv',
+        title: 'Vibe Coding with AI',
+        desc: 'Use AI as a coding partner to write, debug, and iterate on real code. Learn how to direct AI effectively to build functional software without prior experience.'
+      },
+      {
+        id: 13, tier: 'adv',
+        title: 'Agentic AI',
+        desc: 'Agentic AI systems can plan, take actions, and complete multi-step tasks on their own. Explore how autonomous agents work and where they are already being deployed.'
+      },
+      {
+        id: 14, tier: 'adv',
+        title: 'APIs & MCP Protocols',
+        desc: 'APIs let software talk to software. MCP protocols let AI agents connect to external tools. Learn how to use these building blocks to connect AI to the real world.'
+      },
+      {
+        id: 15, tier: 'adv',
+        title: 'Capstone Design Challenge',
+        desc: 'Apply everything you have learned to design a real AI-powered solution to a problem in your community. Plan it, present it, and defend your choices.'
+      },
+    ];
+
+    async function logout() {
+      await client.auth.signOut();
+      window.location.href = 'login.html';
+    }
+
+    function renderModuleCard(mod, progress) {
+      const p = progress.find(r => r.module_id === mod.id);
+      const complete = p && p.status === 'complete';
+      const score = p ? p.quiz_score : null;
+      const totalQ = p ? p.total_questions : null;
+
+      return `
+        <a href="module.html?id=${mod.id}" class="module-card ${mod.tier}">
+          <div class="module-card-top">
+            <div class="module-num">MOD ${String(mod.id).padStart(2, '0')}</div>
+            <div class="module-status">
+              ${score !== null ? `<span class="module-score">${score}/${totalQ}</span>` : ''}
+              <div class="status-check ${complete ? 'complete' : 'incomplete'}">
+                ${complete ? '✓' : mod.id}
+              </div>
+            </div>
+          </div>
+          <h3>${mod.title}</h3>
+          <p>${mod.desc}</p>
+          <span class="module-pill">${mod.tier === 'beg' ? 'Beginner' : mod.tier === 'int' ? 'Intermediate' : 'Advanced'}</span>
+        </a>
+      `;
+    }
+
+    function updateProgress(progress) {
+      const completed = progress.filter(p => p.status === 'complete').length;
+      const pct = Math.round((completed / 15) * 100);
+      const scores = progress.filter(p => p.quiz_score !== null).map(p => p.quiz_score / p.total_questions * 100);
+      const avg = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
+
+      document.getElementById('progress-bar').style.width = pct + '%';
+      document.getElementById('completed-count').textContent = completed;
+      document.getElementById('stat-completed').textContent = completed;
+      document.getElementById('stat-remaining').textContent = 15 - completed;
+      document.getElementById('stat-avg').textContent = avg !== null ? avg + '%' : '—';
+    }
+
+    async function init() {
+      const { data: sessionData } = await client.auth.getSession();
+
+      if (!sessionData.session) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      const user = sessionData.session.user;
+      const name = user.user_metadata?.full_name || user.email.split('@')[0];
+
+      document.getElementById('user-name').textContent = name;
+      document.getElementById('topbar-email').textContent = user.email;
+
+      let progress = [];
+
+      try {
+        const { data, error } = await client
+          .from('progress')
+          .select('module_id, status, quiz_score, total_questions')
+          .eq('user_id', user.id);
+
+        if (!error && data) progress = data;
+      } catch (e) {
+        // progress table may not exist yet — show empty state
+      }
+
+      updateProgress(progress);
+
+      const begContainer  = document.getElementById('grid-beginner');
+      const intContainer  = document.getElementById('grid-intermediate');
+      const advContainer  = document.getElementById('grid-advanced');
+
+      MODULES.filter(m => m.tier === 'beg').forEach(m => {
+        begContainer.innerHTML += renderModuleCard(m, progress);
+      });
+      MODULES.filter(m => m.tier === 'int').forEach(m => {
+        intContainer.innerHTML += renderModuleCard(m, progress);
+      });
+      MODULES.filter(m => m.tier === 'adv').forEach(m => {
+        advContainer.innerHTML += renderModuleCard(m, progress);
+      });
+
+      document.getElementById('loading-state').style.display = 'none';
+      document.getElementById('page-content').style.display = 'block';
+    }
+
+    init();
+  </script>
+
+</body>
+</html>

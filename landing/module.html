@@ -1,0 +1,583 @@
+<!-- Made by Peter Shawkat -->
+<!-- haibi297, Pedro on Github -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AIware — Module</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="modules-data.js"></script>
+
+  <style>
+    :root {
+      --dc-bar:      #1e1f22;
+      --dc-sidebar:  #2b2d31;
+      --dc-main:     #313338;
+      --dc-elevated: #383a40;
+      --blue:        #3b82f6;
+      --blue-lt:     #60a5fa;
+      --blue-glow:   rgba(59,130,246,0.35);
+      --cyan:        #38bdf8;
+      --green:       #23a559;
+      --green-lt:    #3ba55d;
+      --purple:      #9b84ee;
+      --purple-lt:   #b9aaff;
+      --text:        #dbdee1;
+      --text-bright: #f2f3f5;
+      --muted:       #949ba4;
+      --muted-lt:    #b5bac1;
+      --border:      rgba(255,255,255,0.06);
+      --r:           8px;
+      --r-btn:       50px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--dc-main);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    /* Topbar */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(30,31,34,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      height: 52px;
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+      gap: 16px;
+    }
+
+    .topbar-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.1rem;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, var(--blue-lt), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-decoration: none;
+    }
+
+    .topbar-divider { width: 1px; height: 18px; background: var(--border); }
+
+    .topbar-back {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .topbar-back:hover { color: var(--text-bright); }
+
+    .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+
+    .btn-logout {
+      background: var(--dc-elevated);
+      color: var(--muted-lt);
+      border: 1px solid var(--border);
+      border-radius: var(--r-btn);
+      padding: 5px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .btn-logout:hover { background: rgba(255,255,255,0.08); color: var(--text-bright); }
+
+    /* Banner */
+    .module-banner {
+      padding: 40px 32px 36px;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .module-banner::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: 0.06;
+    }
+
+    .module-banner.beg { background: linear-gradient(135deg, rgba(35,165,89,0.18) 0%, transparent 70%); }
+    .module-banner.int { background: linear-gradient(135deg, rgba(59,130,246,0.18) 0%, transparent 70%); }
+    .module-banner.adv { background: linear-gradient(135deg, rgba(155,132,238,0.18) 0%, transparent 70%); }
+
+    .banner-inner { max-width: 800px; }
+
+    .banner-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .banner-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .banner-pill {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 2px 10px;
+      border-radius: 20px;
+    }
+
+    .beg .banner-pill { background: rgba(35,165,89,0.2); color: var(--green-lt); }
+    .int .banner-pill { background: rgba(59,130,246,0.2); color: var(--blue-lt); }
+    .adv .banner-pill { background: rgba(155,132,238,0.2); color: var(--purple-lt); }
+
+    .module-banner h1 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      letter-spacing: -0.03em;
+      color: var(--text-bright);
+      margin-bottom: 10px;
+      line-height: 1.15;
+    }
+
+    .banner-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .banner-status.complete { color: var(--green); }
+
+    /* Content layout */
+    .content-wrap {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    /* Section blocks */
+    .block {
+      margin-bottom: 40px;
+    }
+
+    .block-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--blue-lt);
+      margin-bottom: 14px;
+    }
+
+    /* Intro */
+    .intro-text {
+      font-size: 0.98rem;
+      color: var(--muted-lt);
+      font-weight: 300;
+      line-height: 1.8;
+      padding: 20px 24px;
+      background: var(--dc-sidebar);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--blue);
+      border-radius: var(--r);
+    }
+
+    /* Objectives */
+    .objectives-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .objectives-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 16px;
+      background: var(--dc-sidebar);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+
+    .obj-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--blue-lt);
+      min-width: 20px;
+      margin-top: 1px;
+    }
+
+    /* Concepts */
+    .concept-card {
+      background: var(--dc-sidebar);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 22px 24px;
+      margin-bottom: 14px;
+      transition: border-color 0.2s;
+    }
+
+    .concept-card:hover { border-color: rgba(59,130,246,0.25); }
+
+    .concept-card h3 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--text-bright);
+      margin-bottom: 10px;
+      letter-spacing: -0.01em;
+    }
+
+    .concept-card p {
+      font-size: 0.9rem;
+      color: var(--text);
+      font-weight: 300;
+      margin-bottom: 14px;
+      line-height: 1.75;
+    }
+
+    .example-box {
+      background: rgba(59,130,246,0.06);
+      border: 1px solid rgba(59,130,246,0.15);
+      border-radius: 6px;
+      padding: 12px 16px;
+    }
+
+    .example-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--blue-lt);
+      margin-bottom: 6px;
+    }
+
+    .example-box p {
+      font-size: 0.85rem;
+      color: var(--muted-lt);
+      margin-bottom: 0;
+      font-style: italic;
+    }
+
+    /* Activity */
+    .activity-card {
+      background: var(--dc-sidebar);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 22px 24px;
+    }
+
+    .activity-card h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-bright);
+      margin-bottom: 10px;
+    }
+
+    .activity-card p {
+      font-size: 0.9rem;
+      color: var(--muted-lt);
+      font-weight: 300;
+      line-height: 1.75;
+    }
+
+    /* Nav buttons */
+    .module-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+      margin-top: 8px;
+    }
+
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: var(--r-btn);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      border: none;
+      transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+    }
+
+    .nav-btn:hover { transform: translateY(-1px); }
+
+    .nav-btn-primary {
+      background: var(--blue);
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(59,130,246,0.3);
+    }
+
+    .nav-btn-primary:hover { background: var(--blue-lt); box-shadow: 0 6px 20px rgba(59,130,246,0.45); }
+
+    .nav-btn-secondary {
+      background: var(--dc-elevated);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .nav-btn-secondary:hover { background: rgba(255,255,255,0.08); }
+
+    .nav-btn-ghost {
+      background: none;
+      color: var(--muted);
+      padding: 10px 0;
+    }
+
+    .nav-center { text-align: center; color: var(--muted); font-size: 0.8rem; }
+
+    /* Coming soon */
+    .coming-soon {
+      text-align: center;
+      padding: 80px 24px;
+      color: var(--muted);
+    }
+
+    .coming-soon h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text-bright);
+      margin-bottom: 10px;
+    }
+
+    /* Loading */
+    .loading-state {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--muted);
+    }
+
+    .loading-spinner {
+      width: 32px; height: 32px;
+      border: 3px solid var(--border);
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Responsive */
+    @media (max-width: 680px) {
+      .topbar { padding: 0 16px; }
+      .module-banner { padding: 28px 16px; }
+      .content-wrap { padding: 24px 16px 60px; }
+      .module-nav { flex-direction: column; align-items: stretch; }
+      .nav-btn { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <a href="index.html" class="topbar-logo">AIware</a>
+    <div class="topbar-divider"></div>
+    <a href="dashboard.html" class="topbar-back">← Dashboard</a>
+    <div class="topbar-right">
+      <button class="btn-logout" onclick="logout()">Log Out</button>
+    </div>
+  </div>
+
+  <div id="loading-state" class="loading-state">
+    <div class="loading-spinner"></div>
+    <p>Loading module...</p>
+  </div>
+
+  <div id="page-content" style="display:none;"></div>
+
+  <script>
+    const { createClient } = supabase;
+    const client = createClient(
+      'https://lhqdgwzflevedkpgqafm.supabase.co',
+      'sb_publishable_HHsJdDgkNFDOwEGrHPdjRg_nM92YML1'
+    );
+
+    function getModuleId() {
+      const params = new URLSearchParams(window.location.search);
+      return parseInt(params.get('id')) || 1;
+    }
+
+    function tierLabel(tier) {
+      return tier === 'beg' ? 'Beginner' : tier === 'int' ? 'Intermediate' : 'Advanced';
+    }
+
+    async function logout() {
+      await client.auth.signOut();
+      window.location.href = 'login.html';
+    }
+
+    function renderComingSoon(id) {
+      return `
+        <div class="module-banner int">
+          <div class="banner-inner">
+            <div class="banner-meta">
+              <span class="banner-num">MOD ${String(id).padStart(2,'0')}</span>
+              <span class="banner-pill">Advanced</span>
+            </div>
+            <h1>Coming Soon</h1>
+          </div>
+        </div>
+        <div class="coming-soon">
+          <h2>This module is being built</h2>
+          <p>Check back soon — advanced modules are on their way.</p>
+          <br/>
+          <a href="dashboard.html" class="nav-btn nav-btn-primary" style="display:inline-flex;">← Back to Dashboard</a>
+        </div>
+      `;
+    }
+
+    function renderModule(mod, progress) {
+      const p = progress.find(r => r.module_id === mod.id);
+      const complete = p && p.status === 'complete';
+      const score = p ? p.quiz_score : null;
+      const total = p ? p.total_questions : null;
+
+      const prevId = mod.id > 1 ? mod.id - 1 : null;
+      const nextId = mod.id < 15 ? mod.id + 1 : null;
+
+      const prevExists = prevId && MODULES_DATA[prevId];
+      const nextExists = nextId && MODULES_DATA[nextId];
+
+      const conceptsHtml = mod.concepts.map((c, i) => `
+        <div class="concept-card">
+          <h3>Concept ${i + 1}: ${c.title}</h3>
+          <p>${c.content}</p>
+          <div class="example-box">
+            <div class="example-label">Real-World Example</div>
+            <p>${c.example}</p>
+          </div>
+        </div>
+      `).join('');
+
+      const objectivesHtml = mod.objectives.map((o, i) => `
+        <li>
+          <span class="obj-num">${i + 1}.</span>
+          <span>${o}</span>
+        </li>
+      `).join('');
+
+      return `
+        <div class="module-banner ${mod.tier}">
+          <div class="banner-inner">
+            <div class="banner-meta">
+              <span class="banner-num">MOD ${String(mod.id).padStart(2,'0')}</span>
+              <span class="banner-pill">${tierLabel(mod.tier)}</span>
+              ${complete ? `<span class="banner-status complete">✓ Completed${score !== null ? ` · ${score}/${total}` : ''}</span>` : ''}
+            </div>
+            <h1>${mod.title}</h1>
+          </div>
+        </div>
+
+        <div class="content-wrap">
+
+          <div class="block">
+            <div class="block-label">Introduction</div>
+            <div class="intro-text">${mod.intro}</div>
+          </div>
+
+          <div class="block">
+            <div class="block-label">Learning Objectives</div>
+            <ul class="objectives-list">${objectivesHtml}</ul>
+          </div>
+
+          <div class="block">
+            <div class="block-label">Lesson Content</div>
+            ${conceptsHtml}
+          </div>
+
+          <div class="block">
+            <div class="block-label">Hands-On Activity</div>
+            <div class="activity-card">
+              <h3>${mod.activity.title}</h3>
+              <p>${mod.activity.desc}</p>
+            </div>
+          </div>
+
+          <div class="module-nav">
+            ${prevId ? `<a href="module.html?id=${prevId}" class="nav-btn nav-btn-secondary">← ${prevExists ? MODULES_DATA[prevId].title : 'Previous Module'}</a>` : '<span></span>'}
+            <div class="nav-center">Module ${mod.id} of 15</div>
+            ${nextId ? `<a href="module.html?id=${nextId}" class="nav-btn nav-btn-primary">${nextExists ? MODULES_DATA[nextId].title : 'Next Module'} →</a>` : '<a href="dashboard.html" class="nav-btn nav-btn-primary">Back to Dashboard →</a>'}
+          </div>
+
+        </div>
+      `;
+    }
+
+    async function init() {
+      const { data: sessionData } = await client.auth.getSession();
+      if (!sessionData.session) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      const user = sessionData.session.user;
+      const moduleId = getModuleId();
+      const mod = MODULES_DATA[moduleId];
+
+      let progress = [];
+      try {
+        const { data, error } = await client
+          .from('progress')
+          .select('module_id, status, quiz_score, total_questions')
+          .eq('user_id', user.id);
+        if (!error && data) progress = data;
+      } catch (e) {}
+
+      const container = document.getElementById('page-content');
+
+      if (!mod) {
+        container.innerHTML = renderComingSoon(moduleId);
+      } else {
+        document.title = `AIware — ${mod.title}`;
+        container.innerHTML = renderModule(mod, progress);
+      }
+
+      document.getElementById('loading-state').style.display = 'none';
+      container.style.display = 'block';
+    }
+
+    init();
+  </script>
+
+</body>
+</html>

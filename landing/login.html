@@ -292,7 +292,7 @@
         return;
       }
 
-      showLoggedIn(data.user.email);
+      window.location.href = "dashboard.html"
     }
 
     async function logout() {
@@ -307,7 +307,7 @@
     async function checkSession() {
       const { data } = await client.auth.getSession();
       if (data.session) {
-        showLoggedIn(data.session.user.email);
+        window.location.href = "dashboard.html";
       }
     }
 

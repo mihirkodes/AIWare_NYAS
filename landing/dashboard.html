@@ -414,6 +414,113 @@
       .progress-card { padding: 18px 16px; flex-direction: column; gap: 20px; }
       .module-grid { grid-template-columns: 1fr; }
     }
+
+    /* My Stats */
+    .stats-section {
+      background: var(--dc-sidebar);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin-bottom: 40px;
+    }
+
+    .stats-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .stats-section-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text-bright);
+      letter-spacing: -0.01em;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+    }
+
+    .stats-tile {
+      background: var(--dc-main);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 16px 18px;
+      text-align: center;
+    }
+
+    .stats-tile-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--blue-lt);
+      line-height: 1;
+      margin-bottom: 5px;
+    }
+
+    .stats-tile-lbl {
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-weight: 400;
+      letter-spacing: 0.03em;
+    }
+
+    .stats-section-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--blue-lt);
+      margin-bottom: 14px;
+    }
+
+    /* Reset Progress */
+    .reset-section {
+      background: var(--dc-sidebar);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 22px 28px;
+      margin-bottom: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .reset-info h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-bright);
+      margin-bottom: 3px;
+    }
+
+    .reset-info p { font-size: 0.82rem; color: var(--muted); font-weight: 300; }
+
+    .btn-reset {
+      background: rgba(248,113,113,0.1);
+      color: #f87171;
+      border: 1px solid rgba(248,113,113,0.25);
+      border-radius: var(--r-btn);
+      padding: 8px 18px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-reset:hover { background: rgba(248,113,113,0.18); box-shadow: 0 0 12px rgba(248,113,113,0.2); }
+    .btn-reset:disabled { opacity: 0.5; cursor: not-allowed; }
+
   </style>
 </head>
 <body>
@@ -467,6 +574,38 @@
           <div class="progress-stat-lbl">Avg. Score</div>
         </div>
       </div>
+    </div>
+
+    <!-- My Stats -->
+    <div class="stats-section">
+      <div class="stats-section-label">My Stats</div>
+      <div class="stats-grid">
+        <div class="stats-tile">
+          <div class="stats-tile-num" id="mstat-completed">0</div>
+          <div class="stats-tile-lbl">Modules Completed</div>
+        </div>
+        <div class="stats-tile">
+          <div class="stats-tile-num" id="mstat-avg">—</div>
+          <div class="stats-tile-lbl">Avg. Quiz Score</div>
+        </div>
+        <div class="stats-tile">
+          <div class="stats-tile-num" id="mstat-streak">—</div>
+          <div class="stats-tile-lbl">Current Section</div>
+        </div>
+        <div class="stats-tile">
+          <div class="stats-tile-num" id="mstat-remaining">15</div>
+          <div class="stats-tile-lbl">Modules Left</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reset Progress -->
+    <div class="reset-section">
+      <div class="reset-info">
+        <h3>Reset Progress</h3>
+        <p>Clear all completed modules and quiz scores and start from scratch.</p>
+      </div>
+      <button class="btn-reset" id="btn-reset" onclick="resetProgress()">Reset Progress</button>
     </div>
 
     <!-- Beginner modules -->
@@ -615,17 +754,53 @@
       `;
     }
 
+    function currentSection(progress) {
+      const completedIds = progress.filter(p => p.status === 'complete').map(p => p.module_id);
+      const allBeg = [1,2,3,4,5].every(id => completedIds.includes(id));
+      const allInt = [6,7,8,9,10].every(id => completedIds.includes(id));
+      if (allBeg && allInt) return 'Advanced';
+      if (allBeg) return 'Intermediate';
+      return 'Beginner';
+    }
+
     function updateProgress(progress) {
       const completed = progress.filter(p => p.status === 'complete').length;
       const pct = Math.round((completed / 15) * 100);
-      const scores = progress.filter(p => p.quiz_score !== null).map(p => p.quiz_score / p.total_questions * 100);
+      const scores = progress.filter(p => p.quiz_score !== null && p.total_questions > 0)
+        .map(p => (p.quiz_score / p.total_questions) * 100);
       const avg = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
+      const section = currentSection(progress);
 
       document.getElementById('progress-bar').style.width = pct + '%';
       document.getElementById('completed-count').textContent = completed;
       document.getElementById('stat-completed').textContent = completed;
       document.getElementById('stat-remaining').textContent = 15 - completed;
       document.getElementById('stat-avg').textContent = avg !== null ? avg + '%' : '—';
+
+      document.getElementById('mstat-completed').textContent = completed;
+      document.getElementById('mstat-avg').textContent = avg !== null ? avg + '%' : '—';
+      document.getElementById('mstat-streak').textContent = section;
+      document.getElementById('mstat-remaining').textContent = 15 - completed;
+    }
+
+    async function resetProgress() {
+      const confirmed = confirm('Are you sure you want to reset all your progress? This will delete all your quiz scores and completed modules. This cannot be undone.');
+      if (!confirmed) return;
+
+      const btn = document.getElementById('btn-reset');
+      btn.disabled = true;
+      btn.textContent = 'Resetting...';
+
+      const { data: sessionData } = await client.auth.getSession();
+      if (!sessionData.session) { btn.disabled = false; btn.textContent = 'Reset Progress'; return; }
+
+      const userId = sessionData.session.user.id;
+
+      await client.from('quiz_responses').delete().eq('user_id', userId);
+      await client.from('progress').delete().eq('user_id', userId);
+
+      btn.textContent = 'Reset ✓';
+      setTimeout(() => window.location.reload(), 800);
     }
 
     async function init() {

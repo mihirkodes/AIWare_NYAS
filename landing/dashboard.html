@@ -458,7 +458,7 @@
     .stats-tile-num {
       font-family: 'Syne', sans-serif;
       font-size: 1.8rem;
-      font-weight: 800;
+      font-weight: 400;
       color: var(--blue-lt);
       line-height: 1;
       margin-bottom: 5px;
@@ -520,6 +520,66 @@
 
     .btn-reset:hover { background: rgba(248,113,113,0.18); box-shadow: 0 0 12px rgba(248,113,113,0.2); }
     .btn-reset:disabled { opacity: 0.5; cursor: not-allowed; }
+
+
+    /* Project unlock cards */
+    .project-unlock {
+      border-radius: var(--r);
+      padding: 18px 22px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 36px;
+      border: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .project-unlock.locked {
+      background: rgba(255,255,255,0.02);
+      opacity: 0.55;
+    }
+
+    .project-unlock.unlocked-beg { background: rgba(35,165,89,0.08); border-color: rgba(35,165,89,0.25); }
+    .project-unlock.unlocked-int { background: rgba(59,130,246,0.08); border-color: rgba(59,130,246,0.25); }
+    .project-unlock.unlocked-adv { background: rgba(155,132,238,0.08); border-color: rgba(155,132,238,0.25); }
+
+    .project-icon { font-size: 1.8rem; flex-shrink: 0; }
+
+    .project-info { flex: 1; min-width: 160px; }
+
+    .project-info h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--text-bright);
+      margin-bottom: 3px;
+    }
+
+    .project-info p { font-size: 0.8rem; color: var(--muted); font-weight: 300; }
+
+    .btn-project {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 18px;
+      border-radius: var(--r-btn);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-project-beg { background: rgba(35,165,89,0.2); color: #3ba55d; }
+    .btn-project-beg:hover { background: rgba(35,165,89,0.3); }
+    .btn-project-int { background: rgba(59,130,246,0.2); color: var(--blue-lt); }
+    .btn-project-int:hover { background: rgba(59,130,246,0.3); }
+    .btn-project-adv { background: rgba(155,132,238,0.2); color: var(--purple-lt); }
+    .btn-project-adv:hover { background: rgba(155,132,238,0.3); }
+    .btn-project-locked { background: rgba(255,255,255,0.05); color: var(--muted); cursor: not-allowed; }
 
   </style>
 </head>
@@ -618,6 +678,15 @@
 
     <div class="module-grid" id="grid-beginner"></div>
 
+    <div class="project-unlock locked" id="project1-card">
+      <div class="project-icon">🧠</div>
+      <div class="project-info">
+        <h3>Project 1 — The Memory Bridge</h3>
+        <p id="project1-status">Complete all 5 Beginner modules to unlock this capstone project.</p>
+      </div>
+      <a href="project1.html" class="btn-project btn-project-locked" id="project1-btn" onclick="return false;">🔒 Locked</a>
+    </div>
+
     <!-- Intermediate modules -->
     <div class="section-header">
       <div class="section-dot" style="background:var(--blue)"></div>
@@ -627,6 +696,15 @@
     </div>
 
     <div class="module-grid" id="grid-intermediate"></div>
+
+    <div class="project-unlock locked" id="project2-card">
+      <div class="project-icon">✏️</div>
+      <div class="project-info">
+        <h3>Project 2 — The Glyph-Guardian</h3>
+        <p id="project2-status">Complete all 5 Intermediate modules to unlock this capstone project.</p>
+      </div>
+      <a href="project2.html" class="btn-project btn-project-locked" id="project2-btn" onclick="return false;">🔒 Locked</a>
+    </div>
 
     <!-- Advanced modules -->
     <div class="section-header">
@@ -638,6 +716,14 @@
 
     <div class="module-grid" id="grid-advanced"></div>
 
+    <div class="project-unlock locked" id="project3-card">
+      <div class="project-icon">🍜</div>
+      <div class="project-info">
+        <h3>Project 3 — The Dorm-Room Alchemist</h3>
+        <p id="project3-status">Complete all 5 Advanced modules to unlock this capstone project.</p>
+      </div>
+      <a href="project3.html" class="btn-project btn-project-locked" id="project3-btn" onclick="return false;">🔒 Locked</a>
+    </div>
   </div>
 
   <script>
@@ -781,6 +867,28 @@
       document.getElementById('mstat-avg').textContent = avg !== null ? avg + '%' : '—';
       document.getElementById('mstat-streak').textContent = section;
       document.getElementById('mstat-remaining').textContent = 15 - completed;
+
+      const completedIds = progress.filter(p => p.status === 'complete').map(p => p.module_id);
+
+      function unlockProject(cardId, btnId, statusId, btnClass, label) {
+        const card = document.getElementById(cardId);
+        const btn  = document.getElementById(btnId);
+        const status = document.getElementById(statusId);
+        card.classList.remove('locked');
+        card.classList.add(btnClass.replace('btn-project-', 'unlocked-'));
+        btn.className = 'btn-project ' + btnClass;
+        btn.removeAttribute('onclick');
+        btn.textContent = '↗ Open Worksheet';
+        status.textContent = label;
+      }
+
+      const begDone = [1,2,3,4,5].every(id => completedIds.includes(id));
+      const intDone = [6,7,8,9,10].every(id => completedIds.includes(id));
+      const advDone = [11,12,13,14,15].every(id => completedIds.includes(id));
+
+      if (begDone) unlockProject('project1-card','project1-btn','project1-status','btn-project-beg','🎉 Beginner section complete — worksheet unlocked!');
+      if (intDone) unlockProject('project2-card','project2-btn','project2-status','btn-project-int','🎉 Intermediate section complete — worksheet unlocked!');
+      if (advDone) unlockProject('project3-card','project3-btn','project3-status','btn-project-adv','🎉 Advanced section complete — worksheet unlocked!');
     }
 
     async function resetProgress() {

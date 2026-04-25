@@ -1,0 +1,359 @@
+<!-- Made by Peter Shawkat -->
+<!-- haibi297, Pedro on Github -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AIware — Project 2: The Glyph-Guardian</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --dc-sidebar:  #2b2d31;
+      --dc-main:     #313338;
+      --dc-elevated: #383a40;
+      --blue:        #3b82f6;
+      --blue-lt:     #60a5fa;
+      --cyan:        #38bdf8;
+      --text:        #dbdee1;
+      --text-bright: #f2f3f5;
+      --muted:       #949ba4;
+      --muted-lt:    #b5bac1;
+      --border:      rgba(255,255,255,0.06);
+      --r:           8px;
+      --r-btn:       50px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--dc-main);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    .topbar {
+      background: rgba(30,31,34,0.95);
+      border-bottom: 1px solid var(--border);
+      height: 52px;
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .topbar-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.1rem;
+      background: linear-gradient(135deg, var(--blue-lt), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-decoration: none;
+    }
+
+    .topbar-divider { width: 1px; height: 18px; background: var(--border); }
+    .topbar-back { font-size: 0.82rem; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+    .topbar-back:hover { color: var(--text-bright); }
+    .topbar-right { margin-left: auto; }
+
+    .btn-print {
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: var(--r-btn);
+      padding: 6px 18px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-print:hover { background: var(--blue-lt); }
+
+    .page { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+
+    .project-banner {
+      background: linear-gradient(135deg, rgba(59,130,246,0.18) 0%, transparent 70%);
+      border: 1px solid rgba(59,130,246,0.2);
+      border-radius: 12px;
+      padding: 32px 36px;
+      margin-bottom: 40px;
+    }
+
+    .project-tag { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--blue-lt); margin-bottom: 10px; }
+
+    .project-banner h1 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      letter-spacing: -0.03em;
+      color: var(--text-bright);
+      margin-bottom: 8px;
+    }
+
+    .project-banner p { color: var(--muted); font-size: 0.95rem; font-weight: 300; }
+
+    .section-block {
+      background: var(--dc-sidebar);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 28px 32px;
+      margin-bottom: 20px;
+    }
+
+    .section-block h2 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--text-bright);
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .field-group { margin-bottom: 20px; }
+
+    .field-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .field-input {
+      width: 100%;
+      background: var(--dc-main);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 10px 14px;
+      color: var(--text-bright);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.92rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .field-input:focus { border-color: var(--blue); }
+    .field-input::placeholder { color: var(--muted); }
+
+    .field-textarea {
+      width: 100%;
+      background: var(--dc-main);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 10px 14px;
+      color: var(--text-bright);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.92rem;
+      outline: none;
+      resize: vertical;
+      min-height: 80px;
+      transition: border-color 0.2s;
+    }
+
+    .field-textarea:focus { border-color: var(--blue); }
+    .field-textarea::placeholder { color: var(--muted); }
+
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    .prompt-template {
+      background: rgba(59,130,246,0.06);
+      border: 1px solid rgba(59,130,246,0.15);
+      border-radius: var(--r);
+      padding: 14px 18px;
+      font-size: 0.88rem;
+      color: var(--muted-lt);
+      font-style: italic;
+      margin-bottom: 14px;
+      line-height: 1.6;
+    }
+
+    .rubric-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .rubric-table th { background: var(--dc-main); padding: 10px 14px; text-align: left; font-family: 'Syne', sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); }
+    .rubric-table td { padding: 12px 14px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; line-height: 1.55; }
+    .rubric-table tr:last-child td { border-bottom: none; }
+    .rubric-table tr:hover td { background: rgba(255,255,255,0.02); }
+    .score-5 { color: #23a559; font-weight: 600; }
+    .score-3 { color: var(--blue-lt); font-weight: 600; }
+    .score-1 { color: #f87171; font-weight: 600; }
+    .criteria-name { font-weight: 600; color: var(--text-bright); font-size: 0.88rem; }
+
+    @media print {
+      body { background: #fff; color: #000; }
+      .topbar { display: none; }
+      .project-banner { background: #eff6ff; border-color: #bfdbfe; }
+      .project-banner h1 { color: #000; }
+      .project-banner p { color: #1e40af; }
+      .project-tag { color: #2563eb; }
+      .section-block { background: #fff; border-color: #e5e7eb; }
+      .section-block h2 { color: #000; border-color: #e5e7eb; }
+      .field-label { color: #6b7280; }
+      .field-input, .field-textarea { background: #f9fafb; border-color: #d1d5db; color: #000; }
+      .rubric-table th { background: #f3f4f6; color: #374151; }
+      .rubric-table td { color: #374151; border-color: #e5e7eb; }
+      .prompt-template { background: #eff6ff; border-color: #bfdbfe; color: #1e40af; }
+    }
+
+    @media (max-width: 600px) {
+      .topbar { padding: 0 16px; }
+      .page { padding: 24px 16px 60px; }
+      .section-block { padding: 20px 18px; }
+      .field-row { grid-template-columns: 1fr; }
+      .rubric-table { font-size: 0.78rem; }
+      .rubric-table th, .rubric-table td { padding: 8px 10px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <a href="index.html" class="topbar-logo">AIware</a>
+    <div class="topbar-divider"></div>
+    <a href="dashboard.html" class="topbar-back">← Dashboard</a>
+    <div class="topbar-right">
+      <button class="btn-print" onclick="window.print()">🖨 Print / Save PDF</button>
+    </div>
+  </div>
+
+  <div class="page">
+
+    <div class="project-banner">
+      <div class="project-tag">🔵 Intermediate Capstone · Project 2</div>
+      <h1>The "Glyph-Guardian"</h1>
+      <p>Use AI to create a mnemonic story that helps early readers remember how to correctly orient easily-confused letters like b, d, p, and q — combining narrative, rhyme, and visual design.</p>
+    </div>
+
+    <!-- Part 1 -->
+    <div class="section-block">
+      <h2>Part 1 — Project Planning Worksheet (The Story)</h2>
+
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Team Name</label>
+          <input class="field-input" type="text" placeholder="Your team name" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">Date</label>
+          <input class="field-input" type="text" placeholder="MM/DD/YYYY" />
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">1. The "Tricky" Letter — Which letter are you focusing on?</label>
+        <input class="field-input" type="text" placeholder="b, d, p, or q" />
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">2. The Character Theme — What is the student's high-interest theme?</label>
+        <input class="field-input" type="text" placeholder="e.g. Sharks, Space, Candy, Dinosaurs, Cars, Soccer..." />
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">3. The Mnemonic Prompt — Write the prompt you will give the AI to create the story</label>
+        <div class="prompt-template">Template: "Act as a children's author. For the letter [__], create a 2-line rhyme about a [theme] where the shape of the animal/character matches the shape of the letter."</div>
+        <textarea class="field-textarea" placeholder="Write your customized version of this prompt here — fill in the letter and theme, and add any extra instructions you want the AI to follow..."></textarea>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">4. The Sensory Connection — How will the student "act out" this story?</label>
+        <textarea class="field-textarea" placeholder="e.g. Tracing the 'neck' of the dinosaur with their finger, making a 'belly first' gesture, drawing the character on top of the letter..."></textarea>
+      </div>
+    </div>
+
+    <!-- Part 2 -->
+    <div class="section-block">
+      <h2>Part 2 — User Feedback Form (The "Stickiness" Test)</h2>
+
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Student/Teacher Name</label>
+          <input class="field-input" type="text" placeholder="Name of the person you tested with" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">Age</label>
+          <input class="field-input" type="text" placeholder="Age of the student tester" />
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">1. The Recognition Test — Listen to the story. Can you draw the letter blind?</label>
+        <input class="field-input" type="text" placeholder="Yes / No — and what did they draw?" />
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">2. Engagement — Was the story funny or interesting enough to remember tomorrow?</label>
+        <textarea class="field-textarea" placeholder="Write what the student said or how they reacted to the story..."></textarea>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">3. Clarity — Were any words in the story too big or hard to understand?</label>
+        <textarea class="field-textarea" placeholder="List any words the student stumbled on or didn't know..."></textarea>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">4. The Flip Check — Did the story help the student remember which way the letter faces?</label>
+        <input class="field-input" type="text" placeholder="Yes / No — describe how they tested it" />
+      </div>
+    </div>
+
+    <!-- Part 3 Rubric -->
+    <div class="section-block">
+      <h2>Part 3 — Grading Rubric</h2>
+      <table class="rubric-table">
+        <thead>
+          <tr>
+            <th>Criteria</th>
+            <th><span class="score-5">5 — Excellent</span></th>
+            <th><span class="score-3">3–4 — Good</span></th>
+            <th><span class="score-1">1–2 — Needs Work</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="criteria-name">Mnemonic Effectiveness</span></td>
+            <td>The story creates a perfect "anchor" for the letter's shape; impossible to flip.</td>
+            <td>The story is good, but the "shape" connection is a little weak.</td>
+            <td>The story doesn't actually explain the shape of the letter.</td>
+          </tr>
+          <tr>
+            <td><span class="criteria-name">Visual Design</span></td>
+            <td>The drawing and letter are integrated perfectly into a "single image."</td>
+            <td>The drawing is next to the letter, but they aren't fully "one thing."</td>
+            <td>The drawing is messy or doesn't match the story.</td>
+          </tr>
+          <tr>
+            <td><span class="criteria-name">Student Focus</span></td>
+            <td>The language is 100% appropriate for a 1st–3rd grader.</td>
+            <td>Most words are easy, but 1–2 are too complex for a young child.</td>
+            <td>The story is written for an adult, not a child.</td>
+          </tr>
+          <tr>
+            <td><span class="criteria-name">Testing Insight</span></td>
+            <td>The team changed the story/rhyme after a kid said it was confusing.</td>
+            <td>The team asked for feedback but didn't make changes.</td>
+            <td>No evidence of testing with a real learner.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+</body>
+</html>

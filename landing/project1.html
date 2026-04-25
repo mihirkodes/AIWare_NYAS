@@ -1,0 +1,417 @@
+<!-- Made by Peter Shawkat -->
+<!-- haibi297, Pedro on Github -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AIware — Project 1: The Memory Bridge</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --dc-sidebar:  #2b2d31;
+      --dc-main:     #313338;
+      --dc-elevated: #383a40;
+      --blue:        #3b82f6;
+      --blue-lt:     #60a5fa;
+      --cyan:        #38bdf8;
+      --green:       #23a559;
+      --text:        #dbdee1;
+      --text-bright: #f2f3f5;
+      --muted:       #949ba4;
+      --border:      rgba(255,255,255,0.06);
+      --r:           8px;
+      --r-btn:       50px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--dc-main);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    .topbar {
+      background: rgba(30,31,34,0.95);
+      border-bottom: 1px solid var(--border);
+      height: 52px;
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .topbar-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.1rem;
+      background: linear-gradient(135deg, var(--blue-lt), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-decoration: none;
+    }
+
+    .topbar-divider { width: 1px; height: 18px; background: var(--border); }
+
+    .topbar-back {
+      font-size: 0.82rem;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .topbar-back:hover { color: var(--text-bright); }
+
+    .topbar-right { margin-left: auto; display: flex; gap: 10px; }
+
+    .btn-print {
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: var(--r-btn);
+      padding: 6px 18px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-print:hover { background: var(--blue-lt); }
+
+    .page {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    .project-banner {
+      background: linear-gradient(135deg, rgba(35,165,89,0.18) 0%, transparent 70%);
+      border: 1px solid rgba(35,165,89,0.2);
+      border-radius: 12px;
+      padding: 32px 36px;
+      margin-bottom: 40px;
+    }
+
+    .project-tag {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--green);
+      margin-bottom: 10px;
+    }
+
+    .project-banner h1 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      letter-spacing: -0.03em;
+      color: var(--text-bright);
+      margin-bottom: 8px;
+    }
+
+    .project-banner p { color: var(--muted); font-size: 0.95rem; font-weight: 300; }
+
+    .section-block {
+      background: var(--dc-sidebar);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 28px 32px;
+      margin-bottom: 20px;
+    }
+
+    .section-block h2 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--text-bright);
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      letter-spacing: -0.01em;
+    }
+
+    .field-group { margin-bottom: 20px; }
+
+    .field-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .field-input {
+      width: 100%;
+      background: var(--dc-main);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 10px 14px;
+      color: var(--text-bright);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.92rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .field-input:focus { border-color: var(--green); }
+    .field-input::placeholder { color: var(--muted); }
+
+    .field-textarea {
+      width: 100%;
+      background: var(--dc-main);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 10px 14px;
+      color: var(--text-bright);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.92rem;
+      outline: none;
+      resize: vertical;
+      min-height: 80px;
+      transition: border-color 0.2s;
+    }
+
+    .field-textarea:focus { border-color: var(--green); }
+    .field-textarea::placeholder { color: var(--muted); }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .prompt-box {
+      background: rgba(59,130,246,0.06);
+      border: 1px solid rgba(59,130,246,0.15);
+      border-radius: var(--r);
+      padding: 14px 18px;
+      font-size: 0.88rem;
+      color: var(--muted-lt);
+      font-style: italic;
+      margin-bottom: 14px;
+      line-height: 1.6;
+    }
+
+    /* Rubric table */
+    .rubric-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    .rubric-table th {
+      background: var(--dc-main);
+      padding: 10px 14px;
+      text-align: left;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .rubric-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      vertical-align: top;
+      line-height: 1.55;
+    }
+
+    .rubric-table tr:last-child td { border-bottom: none; }
+    .rubric-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+    .score-5 { color: var(--green); font-weight: 600; }
+    .score-3 { color: var(--blue-lt); font-weight: 600; }
+    .score-1 { color: #f87171; font-weight: 600; }
+
+    .criteria-name {
+      font-weight: 600;
+      color: var(--text-bright);
+      font-size: 0.88rem;
+    }
+
+    @media print {
+      body { background: #fff; color: #000; }
+      .topbar { display: none; }
+      .project-banner { background: #f0fdf4; border-color: #86efac; }
+      .project-banner h1 { color: #000; }
+      .project-banner p, .project-tag { color: #16a34a; }
+      .section-block { background: #fff; border-color: #e5e7eb; }
+      .section-block h2 { color: #000; border-color: #e5e7eb; }
+      .field-label { color: #6b7280; }
+      .field-input, .field-textarea { background: #f9fafb; border-color: #d1d5db; color: #000; }
+      .rubric-table th { background: #f3f4f6; color: #374151; }
+      .rubric-table td { color: #374151; border-color: #e5e7eb; }
+      .prompt-box { background: #eff6ff; border-color: #bfdbfe; color: #1e40af; }
+      .criteria-name { color: #000; }
+    }
+
+    @media (max-width: 600px) {
+      .topbar { padding: 0 16px; }
+      .page { padding: 24px 16px 60px; }
+      .section-block { padding: 20px 18px; }
+      .field-row { grid-template-columns: 1fr; }
+      .rubric-table { font-size: 0.78rem; }
+      .rubric-table th, .rubric-table td { padding: 8px 10px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <a href="index.html" class="topbar-logo">AIware</a>
+    <div class="topbar-divider"></div>
+    <a href="dashboard.html" class="topbar-back">← Dashboard</a>
+    <div class="topbar-right">
+      <button class="btn-print" onclick="window.print()">🖨 Print / Save PDF</button>
+    </div>
+  </div>
+
+  <div class="page">
+
+    <div class="project-banner">
+      <div class="project-tag">🟢 Beginner Capstone · Project 1</div>
+      <h1>The "Memory Bridge"</h1>
+      <p>Use AI to create personalized conversation-starter cards for a senior with memory loss — turning facts about their life into warm, accessible prompts that spark real conversations.</p>
+    </div>
+
+    <!-- Part 1 -->
+    <div class="section-block">
+      <h2>Part 1 — Project Planning Worksheet (The Strategy)</h2>
+
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Team Name</label>
+          <input class="field-input" type="text" placeholder="Your team name" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">Date</label>
+          <input class="field-input" type="text" placeholder="MM/DD/YYYY" />
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">1. The "Daily Anchor" Goal — Describe the specific person you are helping. What is their name, and what is one specific story or hobby they often forget but love to talk about?</label>
+        <textarea class="field-textarea" placeholder="e.g. We are helping Margaret, age 82. She loves talking about her garden but forgets she used to grow prize-winning roses every summer..."></textarea>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">2. Memory Input Log — List 3 key facts the AI needs to turn into a conversation starter</label>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <input class="field-input" type="text" placeholder="Fact 1 (Relation): e.g. Her daughter Linda visits every Sunday" />
+          <input class="field-input" type="text" placeholder="Fact 2 (Memory/Hobby): e.g. She grew roses and won a county fair ribbon in 1974" />
+          <input class="field-input" type="text" placeholder="Fact 3 (Update): e.g. Her granddaughter just started high school" />
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">3. The "Voice" of the AI — How should the AI sound?</label>
+        <input class="field-input" type="text" placeholder="e.g. A gentle old friend, a respectful grandchild, a cheerful narrator" />
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">4. The Accuracy Guardrail — AI sometimes hallucmates details. How will you double-check the AI didn't invent a family member or fake memory?</label>
+        <textarea class="field-textarea" placeholder="e.g. We will read every card to Linda before giving it to Margaret, and cross-check every name and date against the family's own notes..."></textarea>
+      </div>
+    </div>
+
+    <!-- Part 2 -->
+    <div class="section-block">
+      <h2>Part 2 — User Feedback Form (The "Clarity" Check)</h2>
+
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Tester Name</label>
+          <input class="field-input" type="text" placeholder="Name of person testing the card" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">Relation to Senior</label>
+          <input class="field-input" type="text" placeholder="e.g. Daughter, Volunteer, Caregiver" />
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">1. Reading Check — Can you read this card from 2 feet away?</label>
+        <input class="field-input" type="text" placeholder="Yes / No — and if No, what needs to change?" />
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">2. Tone Check — Does this sentence sound natural and kind, or does it sound "robotic"?</label>
+        <textarea class="field-textarea" placeholder="Write your honest reaction to the tone of the card..."></textarea>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">3. The "Spark" Test — Does this card give you enough info to talk for 5 minutes?</label>
+        <input class="field-input" type="text" placeholder="Yes / No — and what topic did it naturally lead to?" />
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">4. One Suggestion — How can we make this less overwhelming for the patient?</label>
+        <textarea class="field-textarea" placeholder="e.g. Use fewer words, bigger font, one topic per card..."></textarea>
+      </div>
+    </div>
+
+    <!-- Part 3 Rubric -->
+    <div class="section-block">
+      <h2>Part 3 — Grading Rubric</h2>
+      <table class="rubric-table">
+        <thead>
+          <tr>
+            <th>Criteria</th>
+            <th><span class="score-5">5 — Excellent</span></th>
+            <th><span class="score-3">3–4 — Good</span></th>
+            <th><span class="score-1">1–2 — Needs Work</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="criteria-name">Empathy & Respect</span></td>
+            <td>Language is dignified, calm, and perfectly suited for someone with memory loss.</td>
+            <td>Language is okay, but might be slightly too complex or "childish."</td>
+            <td>Language is confusing or disrespectful.</td>
+          </tr>
+          <tr>
+            <td><span class="criteria-name">Data Accuracy</span></td>
+            <td>All facts are verified; zero AI hallucinations.</td>
+            <td>Most facts are correct, but one detail feels "off."</td>
+            <td>AI made up significant details that were not caught.</td>
+          </tr>
+          <tr>
+            <td><span class="criteria-name">Accessibility</span></td>
+            <td>Font is 18pt+, high contrast, and very easy for seniors to read.</td>
+            <td>Font is readable but could be clearer or larger.</td>
+            <td>Font is too small or colors are hard to see.</td>
+          </tr>
+          <tr>
+            <td><span class="criteria-name">User Impact</span></td>
+            <td>Feedback shows the cards successfully started a meaningful conversation.</td>
+            <td>The cards helped a little, but the user needed a lot of extra help.</td>
+            <td>The cards did not help start a conversation.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+</body>
+</html>

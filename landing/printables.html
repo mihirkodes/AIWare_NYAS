@@ -1,0 +1,632 @@
+<!-- Made by Peter Shawkat -->
+<!-- haibi297, Pedro on Github -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AIware — Download Printables</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <script src="modules-data.js"></script>
+
+  <style>
+    :root {
+      --dc-sidebar:  #2b2d31;
+      --dc-main:     #313338;
+      --dc-elevated: #383a40;
+      --blue:        #3b82f6;
+      --blue-lt:     #60a5fa;
+      --blue-glow:   rgba(59,130,246,0.35);
+      --cyan:        #38bdf8;
+      --green:       #23a559;
+      --green-lt:    #3ba55d;
+      --purple:      #9b84ee;
+      --purple-lt:   #b9aaff;
+      --text:        #dbdee1;
+      --text-bright: #f2f3f5;
+      --muted:       #949ba4;
+      --muted-lt:    #b5bac1;
+      --border:      rgba(255,255,255,0.06);
+      --r:           8px;
+      --r-btn:       50px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--dc-main);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    /* Topbar */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(30,31,34,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      height: 52px;
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+      gap: 16px;
+    }
+
+    .topbar-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.1rem;
+      background: linear-gradient(135deg, var(--blue-lt), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-decoration: none;
+    }
+
+    .topbar-divider { width: 1px; height: 18px; background: var(--border); }
+    .topbar-back { font-size: 0.82rem; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+    .topbar-back:hover { color: var(--text-bright); }
+    .topbar-page { font-size: 0.88rem; font-weight: 600; color: var(--text-bright); }
+    .topbar-right { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+
+    .btn-print-all {
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: var(--r-btn);
+      padding: 7px 18px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-print-all:hover { background: var(--blue-lt); box-shadow: 0 0 16px var(--blue-glow); }
+
+    /* Page */
+    .page { max-width: 960px; margin: 0 auto; padding: 48px 24px 80px; }
+
+    .page-header { margin-bottom: 40px; }
+
+    .page-header h1 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      letter-spacing: -0.03em;
+      color: var(--text-bright);
+      margin-bottom: 8px;
+    }
+
+    .page-header p { color: var(--muted); font-size: 0.95rem; font-weight: 300; max-width: 540px; }
+
+    /* Tier headers */
+    .tier-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      margin-top: 40px;
+      flex-wrap: wrap;
+    }
+
+    .tier-header:first-of-type { margin-top: 0; }
+
+    .tier-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .tier-line { flex: 1; min-width: 40px; height: 1px; background: var(--border); }
+
+    .tier-label {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted-lt);
+    }
+
+    .tier-goal { font-size: 0.75rem; color: var(--muted); font-weight: 300; }
+
+    /* Module rows */
+    .module-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 8px; }
+
+    .module-row {
+      background: var(--dc-sidebar);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      transition: border-color 0.15s;
+    }
+
+    .mod-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      min-width: 40px;
+      flex-shrink: 0;
+    }
+
+    .beg-color { color: var(--green); }
+    .int-color { color: var(--blue-lt); }
+    .adv-color { color: var(--purple-lt); }
+
+    .mod-info { flex: 1; min-width: 160px; }
+
+    .mod-info h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--text-bright);
+      margin-bottom: 2px;
+    }
+
+    .mod-info p { font-size: 0.78rem; color: var(--muted); font-weight: 300; }
+
+    .btn-print-mod {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 16px;
+      border-radius: var(--r-btn);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      white-space: nowrap;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+
+    .btn-beg { background: rgba(35,165,89,0.15); color: var(--green-lt); }
+    .btn-beg:hover { background: rgba(35,165,89,0.25); }
+    .btn-int { background: rgba(59,130,246,0.15); color: var(--blue-lt); }
+    .btn-int:hover { background: rgba(59,130,246,0.25); }
+    .btn-adv { background: rgba(155,132,238,0.15); color: var(--purple-lt); }
+    .btn-adv:hover { background: rgba(155,132,238,0.25); }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--dc-sidebar);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 780px;
+      max-height: 88vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .modal-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text-bright);
+    }
+
+    .modal-actions { display: flex; gap: 8px; align-items: center; }
+
+    .btn-modal-print {
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: var(--r-btn);
+      padding: 6px 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-modal-print:hover { background: var(--blue-lt); }
+
+    .btn-modal-close {
+      background: var(--dc-elevated);
+      color: var(--muted-lt);
+      border: 1px solid var(--border);
+      border-radius: var(--r-btn);
+      padding: 6px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-modal-close:hover { background: rgba(255,255,255,0.08); }
+
+    .modal-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 28px;
+    }
+
+    .modal-body::-webkit-scrollbar { width: 6px; }
+    .modal-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+    /* Module print content */
+    .print-module-tag {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .print-module-tag.beg { color: var(--green); }
+    .print-module-tag.int { color: var(--blue-lt); }
+    .print-module-tag.adv { color: var(--purple-lt); }
+
+    .print-module-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.5rem;
+      letter-spacing: -0.03em;
+      color: var(--text-bright);
+      margin-bottom: 20px;
+    }
+
+    .print-section-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--blue-lt);
+      margin-bottom: 10px;
+      margin-top: 24px;
+    }
+
+    .print-intro {
+      font-size: 0.9rem;
+      color: var(--muted-lt);
+      font-weight: 300;
+      line-height: 1.8;
+      padding: 14px 18px;
+      background: rgba(59,130,246,0.06);
+      border-left: 3px solid var(--blue);
+      border-radius: 6px;
+    }
+
+    .print-obj-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+
+    .print-obj-list li {
+      display: flex;
+      gap: 10px;
+      font-size: 0.88rem;
+      padding: 10px 14px;
+      background: var(--dc-main);
+      border-radius: 6px;
+      color: var(--text);
+    }
+
+    .print-obj-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--blue-lt);
+      min-width: 16px;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    .print-concept {
+      background: var(--dc-main);
+      border-radius: 6px;
+      padding: 16px 18px;
+      margin-bottom: 10px;
+    }
+
+    .print-concept h4 {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-bright);
+      margin-bottom: 8px;
+    }
+
+    .print-concept p {
+      font-size: 0.85rem;
+      color: var(--text);
+      font-weight: 300;
+      line-height: 1.7;
+      margin-bottom: 10px;
+    }
+
+    .print-example {
+      background: rgba(59,130,246,0.06);
+      border: 1px solid rgba(59,130,246,0.12);
+      border-radius: 5px;
+      padding: 10px 14px;
+    }
+
+    .print-example-label {
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--blue-lt);
+      margin-bottom: 4px;
+    }
+
+    .print-example p { font-size: 0.82rem; color: var(--muted-lt); margin-bottom: 0; font-style: italic; }
+
+    .print-activity {
+      background: var(--dc-main);
+      border-radius: 6px;
+      padding: 16px 18px;
+    }
+
+    .print-activity h4 {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-bright);
+      margin-bottom: 8px;
+    }
+
+    .print-activity p { font-size: 0.85rem; color: var(--muted-lt); font-weight: 300; line-height: 1.7; }
+
+    .print-page-break { height: 1px; background: var(--border); margin: 28px 0; }
+
+    /* ── Print stylesheet ── */
+    @media print {
+      body { background: #fff !important; color: #000 !important; font-family: Georgia, serif; font-size: 11pt; line-height: 1.6; }
+
+      .topbar, .page, .modal-header { display: none !important; }
+
+      .modal-overlay {
+        display: block !important;
+        position: static !important;
+        background: none !important;
+        padding: 0 !important;
+        z-index: auto !important;
+      }
+
+      .modal {
+        max-height: none !important;
+        border: none !important;
+        border-radius: 0 !important;
+        background: #fff !important;
+        display: block !important;
+      }
+
+      .modal-header { display: none !important; }
+
+      .modal-body {
+        overflow: visible !important;
+        padding: 16px !important;
+        max-height: none !important;
+      }
+
+      .print-module-tag { font-size: 8pt !important; }
+      .print-module-tag.beg { color: #15803d !important; }
+      .print-module-tag.int { color: #1d4ed8 !important; }
+      .print-module-tag.adv { color: #6d28d9 !important; }
+
+      .print-module-title { color: #000 !important; font-size: 18pt !important; margin-bottom: 14pt !important; }
+      .print-section-label { color: #1d4ed8 !important; font-size: 7pt !important; margin-top: 16pt !important; }
+
+      .print-intro { background: #f0fdf4 !important; border-left-color: #15803d !important; color: #374151 !important; }
+      .print-obj-list li { background: #f9fafb !important; color: #374151 !important; border: 1px solid #e5e7eb; }
+      .print-obj-num { color: #1d4ed8 !important; }
+
+      .print-concept { background: #f9fafb !important; border: 1px solid #e5e7eb; }
+      .print-concept h4 { color: #000 !important; }
+      .print-concept p { color: #374151 !important; }
+
+      .print-example { background: #eff6ff !important; border-color: #bfdbfe !important; }
+      .print-example-label { color: #1d4ed8 !important; }
+      .print-example p { color: #1e40af !important; }
+
+      .print-activity { background: #f9fafb !important; border: 1px solid #e5e7eb; }
+      .print-activity h4 { color: #000 !important; }
+      .print-activity p { color: #374151 !important; }
+
+      .print-page-break { page-break-after: always; border: none !important; height: 0 !important; margin: 0 !important; }
+    }
+
+    @media (max-width: 600px) {
+      .topbar { padding: 0 16px; }
+      .page { padding: 24px 16px 60px; }
+      .module-row { flex-direction: column; align-items: flex-start; }
+      .btn-print-mod { width: 100%; justify-content: center; }
+      .modal-body { padding: 18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <a href="index.html" class="topbar-logo">AIware</a>
+    <div class="topbar-divider"></div>
+    <a href="index.html" class="topbar-back">← Home</a>
+    <div class="topbar-right">
+      <button class="btn-print-all" onclick="printAll()">🖨 Print All Modules</button>
+    </div>
+  </div>
+
+  <div class="page">
+    <div class="page-header">
+      <h1>Download Printables</h1>
+      <p>Preview and print any module as a PDF or physical handout. Click "Preview & Print" to open the full lesson, then use your browser's print dialog to save as PDF or send to a printer.</p>
+    </div>
+    <div id="module-list-container"></div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
+    <div class="modal" id="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="modal-title">Module Content</div>
+        <div class="modal-actions">
+          <button class="btn-modal-print" onclick="window.print()">🖨 Print / Save as PDF</button>
+          <button class="btn-modal-close" onclick="closeModal()">✕ Close</button>
+        </div>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+    </div>
+  </div>
+
+  <script>
+    function tierLabel(tier) {
+      return tier === 'beg' ? 'Beginner' : tier === 'int' ? 'Intermediate' : 'Advanced';
+    }
+
+    function renderModuleContent(mod) {
+      const tc = mod.tier;
+      const objectives = mod.objectives.map((o, i) => `
+        <li>
+          <span class="print-obj-num">${i + 1}.</span>
+          <span>${o}</span>
+        </li>
+      `).join('');
+
+      const concepts = mod.concepts.map((c, i) => `
+        <div class="print-concept">
+          <h4>Concept ${i + 1}: ${c.title}</h4>
+          <p>${c.content}</p>
+          <div class="print-example">
+            <div class="print-example-label">Real-World Example</div>
+            <p>${c.example}</p>
+          </div>
+        </div>
+      `).join('');
+
+      return `
+        <div class="print-module-tag ${tc}">MOD ${String(mod.id).padStart(2,'0')} · ${tierLabel(tc)}</div>
+        <div class="print-module-title">${mod.title}</div>
+
+        <div class="print-section-label">Introduction</div>
+        <div class="print-intro">${mod.intro}</div>
+
+        <div class="print-section-label">Learning Objectives</div>
+        <ul class="print-obj-list">${objectives}</ul>
+
+        <div class="print-section-label">Lesson Content</div>
+        ${concepts}
+
+        <div class="print-section-label">Hands-On Activity</div>
+        <div class="print-activity">
+          <h4>${mod.activity.title}</h4>
+          <p>${mod.activity.desc}</p>
+        </div>
+      `;
+    }
+
+    function openModal(id) {
+      const mod = MODULES_DATA[id];
+      if (!mod) return;
+      document.getElementById('modal-title').textContent = `MOD ${String(mod.id).padStart(2,'0')} — ${mod.title}`;
+      document.getElementById('modal-body').innerHTML = renderModuleContent(mod);
+      document.getElementById('modal-overlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function handleOverlayClick(e) {
+      if (e.target === document.getElementById('modal-overlay')) closeModal();
+    }
+
+    function closeModal() {
+      document.getElementById('modal-overlay').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function printAll() {
+      const all = Object.values(MODULES_DATA).map((mod, i, arr) =>
+        renderModuleContent(mod) + (i < arr.length - 1 ? '<div class="print-page-break"></div>' : '')
+      ).join('');
+      document.getElementById('modal-title').textContent = 'All 15 Modules — AIware Curriculum';
+      document.getElementById('modal-body').innerHTML = all;
+      document.getElementById('modal-overlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+      setTimeout(() => window.print(), 400);
+    }
+
+    function buildList() {
+      const tiers = [
+        { key: 'beg', label: 'Beginner', goal: 'Modules 1–5 · Understand what AI is and how it shows up in everyday life', color: '#23a559' },
+        { key: 'int', label: 'Intermediate', goal: 'Modules 6–10 · Understand how AI works and its real-world impact', color: '#3b82f6' },
+        { key: 'adv', label: 'Advanced', goal: 'Modules 11–15 · Apply AI concepts and build real systems', color: '#9b84ee' },
+      ];
+
+      const btnMap = { beg: 'btn-beg', int: 'btn-int', adv: 'btn-adv' };
+      const numMap = { beg: 'beg-color', int: 'int-color', adv: 'adv-color' };
+
+      let html = '';
+      tiers.forEach(tier => {
+        const mods = Object.values(MODULES_DATA).filter(m => m.tier === tier.key);
+        html += `
+          <div class="tier-header">
+            <div class="tier-dot" style="background:${tier.color}"></div>
+            <span class="tier-label">${tier.label}</span>
+            <span class="tier-goal">${tier.goal}</span>
+            <div class="tier-line"></div>
+          </div>
+          <div class="module-list">
+        `;
+        mods.forEach(mod => {
+          html += `
+            <div class="module-row">
+              <div class="mod-num ${numMap[mod.tier]}">MOD ${String(mod.id).padStart(2,'0')}</div>
+              <div class="mod-info">
+                <h3>${mod.title}</h3>
+                <p>3 concepts · 1 hands-on activity · ${mod.objectives.length} learning objectives</p>
+              </div>
+              <button class="btn-print-mod ${btnMap[mod.tier]}" onclick="openModal(${mod.id})">
+                🖨 Preview &amp; Print
+              </button>
+            </div>
+          `;
+        });
+        html += `</div>`;
+      });
+
+      document.getElementById('module-list-container').innerHTML = html;
+    }
+
+    buildList();
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeModal();
+    });
+  </script>
+
+</body>
+</html>
